@@ -1,0 +1,5 @@
+{
+  "entry": "main.js",
+  "outfile": "main.bundle.cjs",
+  "target": "node18"
+}

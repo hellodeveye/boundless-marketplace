@@ -1,0 +1,9 @@
+{
+  "id": "ops-console",
+  "name": "Ops Console",
+  "version": "1.0.0",
+  "icon": "🧭",
+  "main": "main.js",
+  "entry": "index.html",
+  "permissions": ["env:read", "env:write"]
+}

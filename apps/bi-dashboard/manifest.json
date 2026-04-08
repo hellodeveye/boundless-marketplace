@@ -1,0 +1,9 @@
+{
+  "id": "bi-dashboard",
+  "name": "BI Dashboard",
+  "version": "1.0.0",
+  "icon": "📊",
+  "main": "main.js",
+  "entry": "index.html",
+  "permissions": ["env:read"]
+}

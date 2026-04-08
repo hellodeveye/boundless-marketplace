@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Demo Tasks</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --bg-soft: rgba(12, 20, 35, 0.72);
+      --panel: rgba(14, 22, 40, 0.84);
+      --panel-border: rgba(162, 191, 255, 0.16);
+      --text: #eef4ff;
+      --muted: #92a4c6;
+      --accent: #7df7c8;
+      --accent-2: #85a9ff;
+      --warning: #ffcb6b;
+      --danger: #ff7d90;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.36);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      font-family: 'Trebuchet MS', 'Segoe UI', 'Avenir Next', sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(125, 247, 200, 0.16), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(133, 169, 255, 0.2), transparent 26%),
+        radial-gradient(circle at 78% 84%, rgba(255, 125, 144, 0.12), transparent 24%),
+        linear-gradient(135deg, #050b14 0%, #0a1628 50%, #050b14 100%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85), transparent 92%);
+      opacity: 0.6;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 20px 40px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding: 16px 0 8px;
+      animation: fade-up 520ms ease both;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(133, 169, 255, 0.22);
+      background: rgba(133, 169, 255, 0.08);
+      color: var(--accent-2);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(125, 247, 200, 0.1);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.3rem, 5vw, 4.6rem);
+      line-height: 0.96;
+      letter-spacing: -0.05em;
+      max-width: 11ch;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 68ch;
+      color: var(--muted);
+      font-size: 1.04rem;
+      line-height: 1.65;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      border: 1px solid var(--panel-border);
+      background: linear-gradient(180deg, rgba(15, 23, 41, 0.92), rgba(8, 13, 24, 0.84));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      animation: fade-up 620ms ease both;
+    }
+
+    .panel::after {
+      content: '';
+      position: absolute;
+      inset: auto -10% -35% auto;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(133, 169, 255, 0.18), transparent 70%);
+      pointer-events: none;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 22px 24px 0;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1.02rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(238, 244, 255, 0.88);
+    }
+
+    .panel-body {
+      padding: 20px 24px 24px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .stat {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .stat-value {
+      margin-top: 10px;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border-radius: 999px;
+      border: 1px solid rgba(125, 247, 200, 0.18);
+      background: rgba(125, 247, 200, 0.08);
+      color: var(--accent);
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .status-pill.is-warn {
+      border-color: rgba(255, 203, 107, 0.22);
+      background: rgba(255, 203, 107, 0.08);
+      color: var(--warning);
+    }
+
+    .status-pill.is-error {
+      border-color: rgba(255, 125, 144, 0.22);
+      background: rgba(255, 125, 144, 0.08);
+      color: var(--danger);
+    }
+
+    .status-pill::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+      box-shadow: 0 0 0 5px color-mix(in srgb, currentColor 14%, transparent);
+    }
+
+    .base-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .mono {
+      font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    .base-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 11px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      word-break: break-all;
+    }
+
+    .task-list {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .task-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: start;
+      padding: 16px 16px 16px 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .task-item:hover {
+      transform: translateY(-1px);
+      border-color: rgba(133, 169, 255, 0.22);
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .task-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      margin-top: 1px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--accent);
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .task-item.is-complete .task-check {
+      border-color: rgba(125, 247, 200, 0.3);
+      background: rgba(125, 247, 200, 0.12);
+    }
+
+    .task-title {
+      margin: 0 0 6px;
+      font-size: 1.02rem;
+      font-weight: 650;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .task-meta {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .task-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(133, 169, 255, 0.1);
+      color: var(--accent-2);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .task-badge.is-complete {
+      background: rgba(125, 247, 200, 0.1);
+      color: var(--accent);
+    }
+
+    .empty {
+      padding: 28px 18px;
+      border-radius: 18px;
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .error {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 125, 144, 0.2);
+      background: rgba(255, 125, 144, 0.08);
+      color: #ffd2da;
+      line-height: 1.6;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .button {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, rgba(125, 247, 200, 0.96), rgba(133, 169, 255, 0.96));
+      color: #05111c;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 160ms ease, filter 160ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.04);
+    }
+
+    .button:active {
+      transform: translateY(0);
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      text-align: right;
+    }
+
+    .pulse {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pulse::before {
+      content: '';
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: currentColor;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.92;
+      }
+      50% {
+        transform: scale(0.72);
+        opacity: 0.45;
+      }
+    }
+
+    @keyframes fade-up {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .task-item {
+        grid-template-columns: auto 1fr;
+      }
+
+      .task-badge {
+        grid-column: 2;
+        justify-self: start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        padding: 20px 14px 30px;
+      }
+
+      .panel-header,
+      .panel-body {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .toolbar {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .button {
+        width: 100%;
+      }
+    }
+
+    /* Custom Scrollbar - Dark Theme */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(14, 22, 40, 0.6);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(133, 169, 255, 0.25);
+      border-radius: 4px;
+      transition: background 160ms ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(133, 169, 255, 0.4);
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    /* Firefox */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(133, 169, 255, 0.25) rgba(14, 22, 40, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="eyebrow">mcp demo / process manager</div>
+      <h1>实时任务面板</h1>
+      <p class="subtitle">Copilot 通过 `/mcp` 修改任务时，这个页面会轮询 `/api/tasks` 并立刻反映变化。页面的 API 基地址来自 `__boundless_api_base`。</p>
+    </section>
+
+    <section class="layout">
+      <article class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">任务概览</h2>
+          <div class="toolbar">
+            <span id="statusPill" class="status-pill pulse">等待连接</span>
+            <button id="refreshBtn" class="button" type="button">立即刷新</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">总任务</div>
+              <div id="totalCount" class="stat-value">-</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">已完成</div>
+              <div id="doneCount" class="stat-value">-</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">最近同步</div>
+              <div id="lastSync" class="stat-value">-</div>
+            </div>
+          </div>
+
+          <div class="base-row">
+            <span>API base</span>
+            <span id="apiBase" class="base-chip mono">-</span>
+          </div>
+
+          <ul id="taskList" class="task-list"></ul>
+          <div id="errorBox" class="error" hidden></div>
+        </div>
+      </article>
+
+      <aside class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Endpoint 说明</h2>
+        </div>
+        <div class="panel-body">
+          <div class="base-row">
+            <span class="task-badge">HTTP</span>
+            <span class="mono">GET /health</span>
+          </div>
+          <div class="base-row">
+            <span class="task-badge">HTTP</span>
+            <span class="mono">GET /api/tasks</span>
+          </div>
+          <div class="base-row">
+            <span class="task-badge">MCP</span>
+            <span class="mono">POST /mcp</span>
+          </div>
+          <p class="subtitle" style="margin-top: 16px;">
+            当 Copilot 调用 <span class="mono">add_task</span> 或 <span class="mono">complete_task</span> 时，右侧和左侧都会通过同一份状态更新。
+          </p>
+          <p class="subtitle" style="margin-top: 16px;">
+            这个示例保留了 HTTP API 和 Streamable HTTP MCP 在同一进程里运行，便于观察状态变化。
+          </p>
+        </div>
+      </aside>
+    </section>
+
+    <div class="footer mono">
+      <span id="footerText">初始化中</span>
+    </div>
+  </main>
+
+  <script>
+    const state = {
+      apiBase: '',
+      tasks: [],
+      health: null,
+      error: '',
+      loading: true,
+      lastSync: '',
+    };
+
+    const refs = {
+      statusPill: document.getElementById('statusPill'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      totalCount: document.getElementById('totalCount'),
+      doneCount: document.getElementById('doneCount'),
+      lastSync: document.getElementById('lastSync'),
+      apiBase: document.getElementById('apiBase'),
+      taskList: document.getElementById('taskList'),
+      errorBox: document.getElementById('errorBox'),
+      footerText: document.getElementById('footerText'),
+    };
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function formatTime(date) {
+      return new Intl.DateTimeFormat('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }).format(date);
+    }
+
+    function normalizeBase(value) {
+      return value ? value.replace(/\/+$/, '') : '';
+    }
+
+    function getApiBaseFromUrl() {
+      try {
+        const url = new URL(window.location.href);
+        return normalizeBase(url.searchParams.get('__boundless_api_base') || '');
+      } catch {
+        return '';
+      }
+    }
+
+    function setStatus(text, tone) {
+      refs.statusPill.textContent = text;
+      refs.statusPill.classList.remove('is-warn', 'is-error', 'pulse');
+      if (tone === 'warn') {
+        refs.statusPill.classList.add('is-warn');
+      } else if (tone === 'error') {
+        refs.statusPill.classList.add('is-error');
+      } else {
+        refs.statusPill.classList.add('pulse');
+      }
+    }
+
+    function render() {
+      refs.apiBase.textContent = state.apiBase || '未提供';
+      refs.totalCount.textContent = String(state.tasks.length);
+      refs.doneCount.textContent = String(state.tasks.filter((task) => task.completed).length);
+      refs.lastSync.textContent = state.lastSync || '-';
+
+      if (state.loading) {
+        setStatus('同步中', 'warn');
+      } else if (state.error) {
+        setStatus('连接异常', 'error');
+      } else if (state.health && state.health.ok) {
+        setStatus('服务在线', 'ok');
+      } else {
+        setStatus('等待连接', 'warn');
+      }
+
+      refs.footerText.textContent = state.error
+        ? `最后错误: ${state.error}`
+        : state.health
+          ? `health=${state.health.ok ? 'ok' : 'degraded'} / tasks=${state.tasks.length}`
+          : '等待首次同步';
+
+      refs.errorBox.hidden = !state.error;
+      refs.errorBox.textContent = state.error;
+
+      if (state.tasks.length === 0) {
+        refs.taskList.innerHTML = '<li class="empty">当前没有任务。等待 Copilot 通过 MCP 添加任务。</li>';
+        return;
+      }
+
+      refs.taskList.innerHTML = state.tasks.map((task) => {
+        const completeClass = task.completed ? 'is-complete' : '';
+        const badgeText = task.completed ? '已完成' : '进行中';
+        const badgeClass = task.completed ? 'task-badge is-complete' : 'task-badge';
+        return `
+          <li class="task-item ${completeClass}">
+            <div class="task-check">${task.completed ? '✓' : '•'}</div>
+            <div>
+              <p class="task-title">${escapeHtml(task.title)}</p>
+              <div class="task-meta mono">id=${escapeHtml(task.id)}</div>
+            </div>
+            <div class="${badgeClass}">${badgeText}</div>
+          </li>
+        `;
+      }).join('');
+    }
+
+    async function fetchJson(path) {
+      const response = await fetch(new URL(path, state.apiBase).toString(), {
+        cache: 'no-store',
+      });
+      if (!response.ok) {
+        throw new Error(`${path} returned ${response.status}`);
+      }
+      return response.json();
+    }
+
+    async function syncTasks() {
+      if (!state.apiBase) {
+        state.loading = false;
+        state.error = '缺少 __boundless_api_base';
+        render();
+        return;
+      }
+
+      state.loading = true;
+      state.error = '';
+      render();
+
+      try {
+        const [health, payload] = await Promise.all([
+          fetchJson('/health'),
+          fetchJson('/api/tasks'),
+        ]);
+
+        state.health = health;
+        state.tasks = Array.isArray(payload?.tasks) ? payload.tasks : [];
+        state.lastSync = formatTime(new Date());
+        state.error = '';
+      } catch (error) {
+        state.error = error instanceof Error ? error.message : String(error);
+      } finally {
+        state.loading = false;
+        render();
+      }
+    }
+
+    refs.refreshBtn.addEventListener('click', () => {
+      void syncTasks();
+    });
+
+    state.apiBase = getApiBaseFromUrl();
+    document.title = state.apiBase ? 'MCP Demo Tasks' : 'MCP Demo Tasks - Missing API Base';
+    render();
+    void syncTasks();
+    window.setInterval(() => {
+      void syncTasks();
+    }, 1500);
+  </script>
+</body>
+</html>

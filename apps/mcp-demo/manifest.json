@@ -1,0 +1,14 @@
+{
+  "id": "mcp-demo",
+  "name": "MCP Demo",
+  "version": "1.0.0",
+  "description": "演示 MCP Server 能力的示例应用",
+  "icon": "🔌",
+  "main": "main.bundle.cjs",
+  "entry": "index.html",
+  "permissions": ["mcp:server"],
+  "mcp": {
+    "endpoint": "/mcp",
+    "transport": "streamable-http"
+  }
+}

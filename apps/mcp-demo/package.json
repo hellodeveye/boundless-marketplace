@@ -1,0 +1,14 @@
+{
+  "name": "mcp-demo-app",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/main.ts --bundle --platform=node --format=cjs --target=node18 --outfile=main.bundle.cjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.11"
+  }
+}

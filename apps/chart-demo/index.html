@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Chart Demo</title>
+  <style>
+    :root {
+      --bg: #0b1320;
+      --panel: #111a2b;
+      --line: #36a2ff;
+      --bar: #5ce6b4;
+      --text: #e7f0ff;
+      --muted: #94a7c6;
+      --border: #263752;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: system-ui;
+      background:
+        radial-gradient(circle at 10% 20%, #17325a 0%, rgba(23, 50, 90, 0) 35%),
+        radial-gradient(circle at 80% 0%, #114d42 0%, rgba(17, 77, 66, 0) 30%),
+        var(--bg);
+      padding: 16px;
+    }
+    .layout {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .panel {
+      background: color-mix(in srgb, var(--panel) 88%, black);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .spacer { flex: 1; }
+    button, select, input {
+      height: 34px;
+      border: 1px solid var(--border);
+      background: #16233a;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+    button { cursor: pointer; }
+    button:hover { background: #1d2d49; }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+    .desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    canvas {
+      width: 100%;
+      height: 360px;
+      display: block;
+      border-radius: 10px;
+      background: #0e1829;
+      border: 1px solid var(--border);
+    }
+    #status {
+      color: var(--muted);
+      font-size: 13px;
+      min-height: 18px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <section class="panel">
+      <h1 class="title">Chart Demo App</h1>
+      <p class="desc">在 Boundless 容器内渲染图表，并通过 AppSDK 保存/加载数据。</p>
+      <div class="row" style="margin-top: 10px">
+        <span class="pill" id="sdkState">检测中...</span>
+        <span class="pill" id="appId">App ID: -</span>
+        <div class="spacer"></div>
+        <label for="chartType">类型</label>
+        <select id="chartType">
+          <option value="line">折线图</option>
+          <option value="bar">柱状图</option>
+        </select>
+        <button id="randomBtn">随机数据</button>
+        <button id="saveBtn">保存到 Env</button>
+        <button id="loadBtn">从 Env 读取</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <canvas id="chart" width="920" height="360"></canvas>
+      <div id="status"></div>
+    </section>
+  </div>
+
+  <script>
+    const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const chart = document.getElementById('chart');
+    const ctx = chart.getContext('2d');
+    const chartTypeEl = document.getElementById('chartType');
+    const statusEl = document.getElementById('status');
+    const sdkStateEl = document.getElementById('sdkState');
+    const appIdEl = document.getElementById('appId');
+    const storageKey = 'CHART_DEMO_SERIES';
+
+    let series = generateSeries();
+
+    function generateSeries() {
+      return labels.map(() => Math.floor(Math.random() * 90) + 10);
+    }
+
+    function drawGrid(maxValue, chartArea) {
+      const lines = 5;
+      ctx.strokeStyle = '#1f304b';
+      ctx.fillStyle = '#6f87ad';
+      ctx.font = '12px system-ui';
+      for (let i = 0; i <= lines; i++) {
+        const y = chartArea.top + (chartArea.height / lines) * i;
+        const value = Math.round(maxValue - (maxValue / lines) * i);
+        ctx.beginPath();
+        ctx.moveTo(chartArea.left, y);
+        ctx.lineTo(chartArea.right, y);
+        ctx.stroke();
+        ctx.fillText(String(value), 6, y + 4);
+      }
+    }
+
+    function drawAxes(chartArea) {
+      ctx.strokeStyle = '#4d688f';
+      ctx.beginPath();
+      ctx.moveTo(chartArea.left, chartArea.top);
+      ctx.lineTo(chartArea.left, chartArea.bottom);
+      ctx.lineTo(chartArea.right, chartArea.bottom);
+      ctx.stroke();
+    }
+
+    function drawLabels(chartArea) {
+      ctx.fillStyle = '#8ea5c7';
+      ctx.font = '12px system-ui';
+      const step = chartArea.width / (labels.length - 1);
+      labels.forEach((label, i) => {
+        const x = chartArea.left + step * i;
+        ctx.fillText(label, x - 10, chartArea.bottom + 18);
+      });
+    }
+
+    function drawLineChart(maxValue, chartArea) {
+      const step = chartArea.width / (series.length - 1);
+      ctx.beginPath();
+      series.forEach((value, i) => {
+        const x = chartArea.left + i * step;
+        const y = chartArea.bottom - (value / maxValue) * chartArea.height;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--line');
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      series.forEach((value, i) => {
+        const x = chartArea.left + i * step;
+        const y = chartArea.bottom - (value / maxValue) * chartArea.height;
+        ctx.beginPath();
+        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#7bc0ff';
+        ctx.fill();
+      });
+    }
+
+    function drawBarChart(maxValue, chartArea) {
+      const gap = 10;
+      const barWidth = (chartArea.width - gap * (series.length - 1)) / series.length;
+      const barColor = getComputedStyle(document.documentElement).getPropertyValue('--bar');
+      series.forEach((value, i) => {
+        const height = (value / maxValue) * chartArea.height;
+        const x = chartArea.left + i * (barWidth + gap);
+        const y = chartArea.bottom - height;
+        ctx.fillStyle = barColor;
+        ctx.fillRect(x, y, barWidth, height);
+      });
+    }
+
+    function renderChart() {
+      ctx.clearRect(0, 0, chart.width, chart.height);
+      const chartArea = {
+        left: 48,
+        top: 20,
+        right: chart.width - 20,
+        bottom: chart.height - 36,
+        width: chart.width - 68,
+        height: chart.height - 56
+      };
+      const maxValue = Math.max(...series, 100);
+
+      drawGrid(maxValue, chartArea);
+      drawAxes(chartArea);
+      drawLabels(chartArea);
+
+      if (chartTypeEl.value === 'line') {
+        drawLineChart(maxValue, chartArea);
+      } else {
+        drawBarChart(maxValue, chartArea);
+      }
+    }
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    async function saveSeries() {
+      if (!window.AppSDK) {
+        setStatus('AppSDK 未注入，无法写入环境变量。');
+        return;
+      }
+      await window.AppSDK.env.set(storageKey, JSON.stringify(series));
+      setStatus(`已保存到 Env: ${storageKey}`);
+    }
+
+    async function loadSeries() {
+      if (!window.AppSDK) {
+        setStatus('AppSDK 未注入，无法读取环境变量。');
+        return;
+      }
+      const raw = await window.AppSDK.env.get(storageKey);
+      if (!raw) {
+        setStatus(`未找到 ${storageKey}，请先保存。`);
+        return;
+      }
+      try {
+        const loaded = JSON.parse(raw);
+        if (Array.isArray(loaded) && loaded.length === labels.length) {
+          series = loaded.map((n) => Number(n) || 0);
+          renderChart();
+          setStatus(`已从 Env 加载 ${storageKey}`);
+        } else {
+          setStatus('Env 中数据格式不正确。');
+        }
+      } catch {
+        setStatus('Env 中数据不是有效 JSON。');
+      }
+    }
+
+    document.getElementById('randomBtn').addEventListener('click', () => {
+      series = generateSeries();
+      renderChart();
+      setStatus('已生成随机数据。');
+    });
+    document.getElementById('saveBtn').addEventListener('click', saveSeries);
+    document.getElementById('loadBtn').addEventListener('click', loadSeries);
+    chartTypeEl.addEventListener('change', renderChart);
+
+    if (window.AppSDK) {
+      sdkStateEl.textContent = 'AppSDK 已注入';
+      appIdEl.textContent = `App ID: ${window.AppSDK.app.id || '(unknown)'}`;
+    } else {
+      sdkStateEl.textContent = 'AppSDK 未注入';
+      setStatus('当前环境没有 AppSDK，请检查容器 preload 配置。');
+    }
+
+    renderChart();
+  </script>
+</body>
+</html>
