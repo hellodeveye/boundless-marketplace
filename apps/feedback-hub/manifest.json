@@ -1,0 +1,10 @@
+{
+  "id": "feedback-hub",
+  "name": "Feedback Hub",
+  "version": "1.0.0",
+  "description": "Markdown-first feedback knowledge base with a read-only viewer",
+  "icon": "🧩",
+  "main": "main.js",
+  "entry": "index.html",
+  "permissions": ["env:read"]
+}

@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feedback Hub</title>
+    <style>
+      :root {
+        --bg: #f2efe7;
+        --surface: #fffdf7;
+        --surface-2: #f7f2e8;
+        --ink: #1f2933;
+        --muted: #5f6c7b;
+        --line: #dfd2bb;
+        --accent: #0f766e;
+        --accent-2: #b45309;
+        --highlight: #fde68a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 15% 12%, #fff5cf 0 14%, transparent 15%),
+          radial-gradient(circle at 85% 20%, #cdeee7 0 13%, transparent 14%),
+          linear-gradient(180deg, #f7f4ee 0%, #ece4d2 100%);
+        font-family: "IBM Plex Sans", "Source Han Sans SC", "Noto Sans SC", sans-serif;
+      }
+
+      .app-shell {
+        width: min(1220px, 100%);
+        margin: 0 auto;
+        padding: 28px 18px 24px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .title-wrap h1 {
+        margin: 0;
+        letter-spacing: 0.02em;
+        font-size: clamp(1.35rem, 1.9vw, 1.7rem);
+      }
+
+      .title-wrap p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .pill {
+        border: 1px solid #d9cfbb;
+        background: linear-gradient(180deg, #fff7e3 0%, #f8ecd2 100%);
+        border-radius: 999px;
+        padding: 8px 12px;
+        color: #7b4b17;
+        font-size: 0.82rem;
+        font-weight: 600;
+      }
+
+      .panel {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 16px;
+      }
+
+      .left,
+      .right {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        box-shadow: 0 12px 24px rgba(44, 55, 74, 0.08);
+      }
+
+      .left {
+        padding: 12px;
+      }
+
+      .search-box {
+        margin-bottom: 10px;
+      }
+
+      .search-box input {
+        width: 100%;
+        border: 1px solid #d5c7ac;
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: #fffdf8;
+        font-size: 0.93rem;
+      }
+
+      .search-box input:focus {
+        outline: 2px solid #7bc9bf;
+        outline-offset: 1px;
+      }
+
+      .list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: calc(100vh - 230px);
+        overflow: auto;
+        padding-right: 2px;
+      }
+
+      .item {
+        width: 100%;
+        border: 1px solid #e8dfd0;
+        background: linear-gradient(180deg, #fffcf5 0%, #faf3e6 100%);
+        border-radius: 10px;
+        padding: 10px;
+        text-align: left;
+        cursor: pointer;
+        transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+      }
+
+      .item:hover {
+        transform: translateY(-1px);
+        border-color: #c8b58f;
+        box-shadow: 0 7px 16px rgba(15, 118, 110, 0.09);
+      }
+
+      .item.active {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.12);
+      }
+
+      .item-title {
+        font-weight: 700;
+        line-height: 1.25;
+      }
+
+      .item-meta {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .right {
+        min-height: calc(100vh - 190px);
+        overflow: hidden;
+      }
+
+      .doc-head {
+        padding: 14px 18px;
+        border-bottom: 1px solid #eadfca;
+        background: linear-gradient(180deg, #fff8e8 0%, #f9edd3 100%);
+      }
+
+      .doc-head h2 {
+        margin: 0;
+        font-size: 1.05rem;
+      }
+
+      .doc {
+        padding: 20px;
+        max-height: calc(100vh - 255px);
+        overflow: auto;
+        line-height: 1.65;
+        font-family: "IBM Plex Serif", "Source Han Serif SC", "Noto Serif SC", serif;
+      }
+
+      .doc h1,
+      .doc h2,
+      .doc h3 {
+        margin: 1.25em 0 0.5em;
+        line-height: 1.35;
+      }
+
+      .doc h1 {
+        font-size: 1.5rem;
+      }
+
+      .doc h2 {
+        font-size: 1.2rem;
+        border-left: 4px solid var(--accent);
+        padding-left: 8px;
+      }
+
+      .doc h3 {
+        font-size: 1.03rem;
+        color: #164e63;
+      }
+
+      .doc p {
+        margin: 0.75em 0;
+      }
+
+      .doc ul,
+      .doc ol {
+        padding-left: 1.4rem;
+        margin: 0.7em 0;
+      }
+
+      .doc code {
+        background: #f9f1dc;
+        color: #7b341e;
+        border: 1px solid #eadfca;
+        border-radius: 4px;
+        padding: 0.06em 0.3em;
+        font-family: "IBM Plex Mono", "Cascadia Mono", monospace;
+      }
+
+      .doc pre {
+        background: #19212f;
+        color: #e7edf8;
+        border-radius: 10px;
+        padding: 12px;
+        overflow: auto;
+      }
+
+      .doc pre code {
+        background: none;
+        border: 0;
+        color: inherit;
+        padding: 0;
+      }
+
+      .doc blockquote {
+        margin: 1em 0;
+        border-left: 4px solid var(--accent-2);
+        background: #fff7e6;
+        padding: 0.6em 0.9em;
+        color: #6b3d13;
+      }
+
+      .doc hr {
+        border: 0;
+        border-top: 1px dashed #d8c9ad;
+        margin: 1.2em 0;
+      }
+
+      .empty {
+        padding: 18px;
+        border: 1px dashed #cfb891;
+        border-radius: 12px;
+        background: #fffbf1;
+        color: #8a5a24;
+      }
+
+      mark {
+        background: var(--highlight);
+        padding: 0 2px;
+      }
+
+      @media (max-width: 980px) {
+        .panel {
+          grid-template-columns: 1fr;
+        }
+
+        .left {
+          order: 1;
+        }
+
+        .right {
+          order: 2;
+          min-height: auto;
+        }
+
+        .list,
+        .doc {
+          max-height: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="header">
+        <div class="title-wrap">
+          <h1>Feedback Hub</h1>
+          <p>一类 Q&A 一个 Markdown，页面仅查看，内容由 Skill 知识库维护。</p>
+        </div>
+        <div class="pill" id="count-pill">加载中</div>
+      </header>
+
+      <main class="panel">
+        <aside class="left">
+          <div class="search-box">
+            <input id="search-input" type="search" placeholder="搜索 Q&A 类别名称或关键词..." />
+          </div>
+          <div class="list" id="list"></div>
+        </aside>
+
+        <section class="right">
+          <div class="doc-head">
+            <h2 id="doc-title">请选择一个 Q&A 类别</h2>
+          </div>
+          <article class="doc" id="doc">
+            <div class="empty">
+              左侧选择一个 Q&A 类别即可查看对应 Markdown。<br />
+              你可以直接维护 `skills/feedback-hub/*.md` 文件，不需要维护页面代码。
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const appRuntime = window.AppSDK?.app || {};
+      const apiBaseUrl = appRuntime.apiBaseUrl || '';
+
+      const state = {
+        items: [],
+        activeSlug: '',
+        query: '',
+        detailCache: new Map()
+      };
+
+      const listEl = document.getElementById('list');
+      const docEl = document.getElementById('doc');
+      const docTitleEl = document.getElementById('doc-title');
+      const searchInputEl = document.getElementById('search-input');
+      const countPillEl = document.getElementById('count-pill');
+
+      function buildApiUrl(path) {
+        return apiBaseUrl ? `${apiBaseUrl}${path}` : path;
+      }
+
+      function escapeHtml(input) {
+        return String(input)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function parseInline(markdown) {
+        let html = escapeHtml(markdown);
+        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        return html;
+      }
+
+      function markdownToHtml(markdown) {
+        const lines = String(markdown || '').replace(/\r\n/g, '\n').split('\n');
+        const output = [];
+        let inCode = false;
+        let codeBuffer = [];
+        let inUl = false;
+        let inOl = false;
+        let paragraphBuffer = [];
+
+        function flushParagraph() {
+          if (paragraphBuffer.length > 0) {
+            output.push('<p>' + parseInline(paragraphBuffer.join(' ')) + '</p>');
+            paragraphBuffer = [];
+          }
+        }
+
+        function closeLists() {
+          if (inUl) {
+            output.push('</ul>');
+            inUl = false;
+          }
+          if (inOl) {
+            output.push('</ol>');
+            inOl = false;
+          }
+        }
+
+        function flushCodeBlock() {
+          if (codeBuffer.length > 0) {
+            output.push('<pre><code>' + escapeHtml(codeBuffer.join('\n')) + '</code></pre>');
+            codeBuffer = [];
+          } else {
+            output.push('<pre><code></code></pre>');
+          }
+        }
+
+        function flushBlockContext() {
+          flushParagraph();
+          closeLists();
+        }
+
+        for (const rawLine of lines) {
+          const line = rawLine || '';
+
+          if (line.startsWith('```')) {
+            if (!inCode) {
+              flushBlockContext();
+              inCode = true;
+            } else {
+              inCode = false;
+              flushCodeBlock();
+            }
+            continue;
+          }
+
+          if (inCode) {
+            codeBuffer.push(line);
+            continue;
+          }
+
+          if (/^\s*$/.test(line)) {
+            flushBlockContext();
+            continue;
+          }
+
+          const heading = line.match(/^(#{1,3})\s+(.+)$/);
+          if (heading) {
+            flushBlockContext();
+            const level = heading[1].length;
+            output.push(`<h${level}>${parseInline(heading[2])}</h${level}>`);
+            continue;
+          }
+
+          if (/^---+$/.test(line.trim())) {
+            flushBlockContext();
+            output.push('<hr />');
+            continue;
+          }
+
+          const quote = line.match(/^\s*>\s+(.+)$/);
+          if (quote) {
+            flushBlockContext();
+            output.push('<blockquote>' + parseInline(quote[1]) + '</blockquote>');
+            continue;
+          }
+
+          const ul = line.match(/^\s*[-*]\s+(.+)$/);
+          if (ul) {
+            flushParagraph();
+            if (inOl) {
+              output.push('</ol>');
+              inOl = false;
+            }
+            if (!inUl) {
+              output.push('<ul>');
+              inUl = true;
+            }
+            output.push('<li>' + parseInline(ul[1]) + '</li>');
+            continue;
+          }
+
+          const ol = line.match(/^\s*\d+\.\s+(.+)$/);
+          if (ol) {
+            flushParagraph();
+            if (inUl) {
+              output.push('</ul>');
+              inUl = false;
+            }
+            if (!inOl) {
+              output.push('<ol>');
+              inOl = true;
+            }
+            output.push('<li>' + parseInline(ol[1]) + '</li>');
+            continue;
+          }
+
+          paragraphBuffer.push(line.trim());
+        }
+
+        if (inCode) {
+          flushCodeBlock();
+        }
+        flushParagraph();
+        closeLists();
+        return output.join('\n');
+      }
+
+      async function fetchJson(url) {
+        const response = await fetch(url);
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(payload.error || `Request failed: ${response.status}`);
+        }
+        return payload;
+      }
+
+      function renderDocMessage(title, message) {
+        docTitleEl.textContent = title;
+        docEl.innerHTML = `<div class="empty">${escapeHtml(message)}</div>`;
+      }
+
+      async function loadList() {
+        const payload = await fetchJson(buildApiUrl('/api/feedback'));
+        state.items = Array.isArray(payload.items) ? payload.items : [];
+        state.items.sort((a, b) => a.title.localeCompare(b.title));
+        renderList();
+        countPillEl.textContent = `共 ${state.items.length} 类`;
+
+        if (!state.activeSlug && state.items.length > 0) {
+          await openItem(state.items[0].slug);
+        }
+      }
+
+      function normalize(value) {
+        return String(value ?? '').toLowerCase();
+      }
+
+      function getVisibleItems() {
+        const q = normalize(state.query).trim();
+        if (!q) {
+          return state.items;
+        }
+        return state.items.filter((item) => {
+          const titleMatch = normalize(item.title).includes(q);
+          const slugMatch = normalize(item.slug).includes(q);
+          const body = state.detailCache.get(item.slug);
+          const bodyMatch = body ? normalize(body.markdown).includes(q) : false;
+          return titleMatch || slugMatch || bodyMatch;
+        });
+      }
+
+      function highlight(text, q) {
+        const normalizedQ = normalize(q).trim();
+        if (!normalizedQ) {
+          return escapeHtml(text);
+        }
+        const source = String(text || '');
+        const lower = source.toLowerCase();
+        const idx = lower.indexOf(normalizedQ);
+        if (idx < 0) {
+          return escapeHtml(source);
+        }
+        const start = escapeHtml(source.slice(0, idx));
+        const mid = escapeHtml(source.slice(idx, idx + normalizedQ.length));
+        const end = escapeHtml(source.slice(idx + normalizedQ.length));
+        return `${start}<mark>${mid}</mark>${end}`;
+      }
+
+      function renderList() {
+        const visible = getVisibleItems();
+        if (visible.length === 0) {
+          listEl.innerHTML = '<div class="empty">没有匹配的 Q&A 类别。</div>';
+          return;
+        }
+
+        listEl.innerHTML = visible
+          .map((item) => {
+            const isActive = item.slug === state.activeSlug;
+            return `
+              <button class="item ${isActive ? 'active' : ''}" data-slug="${escapeHtml(item.slug)}">
+                <div class="item-title">${highlight(item.title, state.query)}</div>
+                <div class="item-meta">/${escapeHtml(item.fileName)}</div>
+              </button>
+            `;
+          })
+          .join('');
+      }
+
+      async function openItem(slug) {
+        if (!slug) {
+          return;
+        }
+        try {
+          let payload = state.detailCache.get(slug);
+          if (!payload) {
+            payload = await fetchJson(buildApiUrl(`/api/feedback/${encodeURIComponent(slug)}`));
+            state.detailCache.set(slug, payload);
+          }
+          state.activeSlug = slug;
+          docTitleEl.textContent = payload.title || slug;
+          docEl.innerHTML = markdownToHtml(payload.markdown || '');
+          renderList();
+        } catch (error) {
+          renderDocMessage('加载失败', error.message || '未知错误');
+        }
+      }
+
+      listEl.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-slug]');
+        if (!button || !listEl.contains(button)) {
+          return;
+        }
+        const slug = button.getAttribute('data-slug');
+        openItem(slug);
+      });
+
+      searchInputEl.addEventListener('input', () => {
+        state.query = searchInputEl.value || '';
+        renderList();
+      });
+
+      loadList().catch((error) => {
+        renderDocMessage('初始化失败', error.message || '未知错误');
+      });
+    </script>
+  </body>
+</html>
