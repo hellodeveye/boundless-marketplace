@@ -2,5 +2,5 @@
   "name": "Boundless Official Marketplace",
   "description": "Official demo applications for Boundless platform",
   "version": "1.0.0",
-  "apps": ["bi-dashboard", "chart-demo", "mcp-demo", "ops-console"]
+  "apps": ["chart-demo", "mcp-demo", "ops-console"]
 }
