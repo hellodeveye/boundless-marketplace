@@ -1,0 +1,10 @@
+{
+  "id": "five-whys",
+  "name": "5 Whys Analysis",
+  "version": "1.0.0",
+  "description": "通过5个为什么方法深入分析问题根本原因，并获得AI智能建议",
+  "icon": "🔍",
+  "main": "main.js",
+  "entry": "index.html",
+  "permissions": ["env:read"]
+}

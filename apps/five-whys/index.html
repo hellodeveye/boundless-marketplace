@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 Whys Analysis</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --host-ui-bg-page: var(--ui-bg-page, #0a111d);
+      --host-ui-text-primary: var(--ui-text-primary, #e7eefc);
+      --host-ui-text-secondary: var(--ui-text-secondary, rgba(231, 238, 252, 0.78));
+      --host-ui-text-muted: var(--ui-text-muted, rgba(231, 238, 252, 0.55));
+      --host-ui-bg-control: var(--ui-bg-control, rgba(255, 255, 255, 0.06));
+      --host-ui-bg-control-hover: var(--ui-bg-control-hover, rgba(255, 255, 255, 0.12));
+      --host-ui-border-default: var(--ui-border-default, rgba(148, 163, 184, 0.4));
+      --host-ui-border-strong: var(--ui-border-strong, rgba(148, 163, 184, 0.5));
+      --host-ui-accent: var(--ui-accent, rgba(6, 182, 212, 0.92));
+      --host-ui-accent-hover: var(--ui-accent-hover, rgba(8, 145, 178, 0.98));
+      --host-ui-accent-soft: var(--ui-accent-soft, rgba(6, 182, 212, 0.16));
+      --host-ui-focus-ring: var(--ui-focus-ring, rgba(56, 189, 248, 0.45));
+
+      --bg-gradient-start: var(--host-ui-bg-page);
+      --bg-gradient-mid: #111827;
+      --bg-gradient-end: #0b1422;
+      --panel-bg: rgba(14, 20, 31, 0.62);
+      --panel-border: var(--host-ui-border-default);
+      --text-primary: var(--host-ui-text-primary);
+      --text-secondary: var(--host-ui-text-secondary);
+      --text-muted: var(--host-ui-text-muted);
+      --accent: var(--host-ui-accent);
+      --accent-hover: var(--host-ui-accent-hover);
+      --accent-light: var(--host-ui-accent-soft);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: rgba(2, 8, 14, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% -10%, rgba(34, 211, 238, 0.12) 0%, transparent 38%),
+        radial-gradient(circle at 88% -18%, rgba(14, 165, 233, 0.09) 0%, transparent 40%),
+        linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 55%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
+      padding: 24px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeInDown 0.6s ease-out;
+    }
+
+    .logo {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #f4fdff 0%, #85dff1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(14px);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: var(--host-ui-border-strong);
+      box-shadow: 0 10px 34px var(--shadow);
+    }
+
+    /* Welcome / Problem Input */
+    .welcome-card {
+      animation: fadeInUp 0.6s ease-out 0.1s both;
+    }
+
+    .problem-input-group {
+      margin-top: 20px;
+    }
+
+    .history-section {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--panel-border);
+    }
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .history-title {
+      font-size: 13px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      font-weight: 700;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--host-ui-bg-control);
+      border: 1px solid var(--panel-border);
+    }
+
+    .history-problem {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      line-height: 1.45;
+    }
+
+    .history-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .config-alert {
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      border: 1px solid transparent;
+    }
+
+    .config-alert.info {
+      background: rgba(17, 184, 213, 0.16);
+      border-color: rgba(17, 184, 213, 0.4);
+      color: #b9eff8;
+    }
+
+    .config-alert.warning {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.35);
+      color: #fde68a;
+    }
+
+    .config-alert.success {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: #a7f3d0;
+    }
+
+    .problem-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .problem-input {
+      width: 100%;
+      padding: 16px 20px;
+      font-size: 16px;
+      border: 2px solid var(--panel-border);
+      border-radius: 12px;
+      background: var(--host-ui-bg-control);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+    }
+
+    .problem-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--host-ui-bg-control-hover);
+      box-shadow: 0 0 0 3px var(--host-ui-focus-ring);
+    }
+
+    .problem-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Why Cards */
+    .why-card {
+      animation: fadeInUp 0.5s ease-out both;
+    }
+
+    .why-card.answered {
+      opacity: 0.7;
+      transform: scale(0.98);
+    }
+
+    .why-card.answered:hover {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .why-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .why-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .why-number.completed {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .why-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .why-question {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      padding-left: 48px;
+    }
+
+    .why-input-group {
+      padding-left: 48px;
+    }
+
+    .why-input {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 15px;
+      border: 2px solid var(--panel-border);
+      border-radius: 10px;
+      background: var(--host-ui-bg-control);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+      margin-bottom: 12px;
+      font-family: inherit;
+    }
+
+    .why-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--host-ui-focus-ring);
+    }
+
+    .why-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .answer-display {
+      padding-left: 48px;
+      padding: 16px 18px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 10px;
+      margin-left: 48px;
+    }
+
+    .answer-label {
+      font-size: 12px;
+      color: var(--success);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .answer-text {
+      font-size: 15px;
+      color: var(--text-primary);
+    }
+
+    .input-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    .btn-small {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(6, 182, 212, 0.35);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      background: var(--text-muted);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--panel-border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--host-ui-bg-control);
+      color: var(--text-primary);
+    }
+
+    /* Loading */
+    .loading-card {
+      text-align: center;
+      padding: 48px;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--panel-border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    .loading-text {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .loading-subtext {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* Results */
+    .results-card {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .results-header-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .results-header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .results-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), #0ea5b7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .results-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .section-icon {
+      font-size: 18px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+    }
+
+    .root-cause-box {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(245, 158, 11, 0.1));
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .root-cause-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: #fca5a5;
+      line-height: 1.5;
+    }
+
+    .analysis-text {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .solution-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .solution-item {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .solution-item:hover {
+      background: rgba(16, 185, 129, 0.12);
+      transform: translateX(4px);
+    }
+
+    .solution-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .solution-priority {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .solution-priority.high {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+
+    .solution-priority.medium {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fcd34d;
+    }
+
+    .solution-priority.low {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+    }
+
+    .solution-title {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .solution-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .prevention-box {
+      background: var(--host-ui-accent-soft);
+      border: 1px solid var(--host-ui-border-default);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .prevention-text {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .summary-section {
+      background: var(--host-ui-bg-control);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+
+    .summary-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .summary-chain {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .summary-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .summary-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--accent-light);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .summary-problem {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .summary-answer {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* Error */
+    .error-card {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .error-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .error-text {
+      color: #fca5a5;
+      margin-bottom: 16px;
+    }
+
+    /* Progress */
+    .progress-bar {
+      height: 4px;
+      background: var(--host-ui-bg-control);
+      border-radius: 2px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #2dd4bf);
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    /* Hidden */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      body {
+        padding: 16px;
+      }
+
+      .title {
+        font-size: 24px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .why-question,
+      .why-input-group,
+      .answer-display {
+        padding-left: 0;
+        margin-left: 0;
+      }
+
+      .why-header {
+        margin-bottom: 12px;
+      }
+
+      .solution-header {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">🔍</div>
+      <h1 class="title">5 Whys Analysis</h1>
+      <p class="subtitle">深入挖掘问题本质，找到根本原因</p>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+
+    <!-- Welcome / Problem Input -->
+    <div class="card welcome-card" id="welcomeCard">
+      <div class="config-alert info" id="configAlert">
+        正在检查 DeepSeek API Key 配置状态...
+      </div>
+      <div class="problem-input-group">
+        <label class="problem-label">描述你遇到的问题</label>
+        <textarea
+          class="problem-input"
+          id="problemInput"
+          placeholder="例如：我们的网站加载速度很慢，导致用户流失..."
+        ></textarea>
+      </div>
+      <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+        <button class="btn btn-primary" id="startBtn" onclick="startAnalysis()">
+          开始分析 →
+        </button>
+      </div>
+
+      <div class="history-section hidden" id="historySection">
+        <div class="history-header">
+          <div class="history-title">历史分析记录</div>
+          <button class="btn btn-secondary btn-small" onclick="clearHistory()">
+            清空
+          </button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </div>
+
+    <!-- Why Cards Container -->
+    <div id="whyCardsContainer"></div>
+
+    <!-- Loading Card -->
+    <div class="card loading-card hidden" id="loadingCard">
+      <div class="spinner"></div>
+      <div class="loading-text">AI 正在分析根本原因...</div>
+      <div class="loading-subtext">请稍候，正在基于你的回答生成洞察</div>
+    </div>
+
+    <!-- Results Card -->
+    <div class="card results-card hidden" id="resultsCard">
+      <div class="results-header">
+        <div class="results-header-main">
+          <div class="results-icon">💡</div>
+          <h2 class="results-title">分析结果</h2>
+        </div>
+        <div class="results-header-actions">
+          <button class="btn btn-secondary btn-small hidden" id="backFromHistoryBtn" onclick="restartAnalysis()">
+            ← 返回历史
+          </button>
+          <button class="btn btn-secondary btn-small" id="copyBtn" onclick="copyResults()">
+            复制结果
+          </button>
+        </div>
+      </div>
+
+      <!-- Root Cause -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-icon">🎯</span>
+          <span class="section-title">根本原因</span>
+        </div>
+        <div class="root-cause-box">
+          <div class="root-cause-text" id="rootCauseText">-</div>
+        </div>
+      </div>
+
+      <!-- Analysis -->
+      <div class="section" id="analysisSection">
+        <div class="section-header">
+          <span class="section-icon">📊</span>
+          <span class="section-title">详细分析</span>
+        </div>
+        <div class="analysis-text" id="analysisText">-</div>
+      </div>
+
+      <!-- Solutions -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-icon">✅</span>
+          <span class="section-title">解决方案</span>
+        </div>
+        <div class="solution-list" id="solutionList"></div>
+      </div>
+
+      <!-- Prevention -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-icon">🛡️</span>
+          <span class="section-title">预防措施</span>
+        </div>
+        <div class="prevention-box">
+          <div class="prevention-text" id="preventionText">-</div>
+        </div>
+      </div>
+
+      <!-- Summary Chain -->
+      <div class="summary-section">
+        <div class="summary-title">分析链路回顾</div>
+        <div class="summary-chain" id="summaryChain"></div>
+      </div>
+
+    </div>
+
+    <!-- Error Card -->
+    <div class="card error-card hidden" id="errorCard">
+      <div class="error-icon">⚠️</div>
+      <div class="error-text" id="errorText">分析过程中出现错误</div>
+      <button class="btn btn-secondary" onclick="retryAnalysis()">
+        重试
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let problem = '';
+    let answers = [];
+    let currentStep = 0;
+    let analysisResult = null;
+    let deepseekConfigured = false;
+    let historyItems = [];
+
+    const appRuntime = window.AppSDK?.app || {};
+    const apiBaseUrl = appRuntime.apiBaseUrl || '';
+    const startBtn = document.getElementById('startBtn');
+    const configAlert = document.getElementById('configAlert');
+    const historySection = document.getElementById('historySection');
+    const historyList = document.getElementById('historyList');
+    const copyBtn = document.getElementById('copyBtn');
+    const backFromHistoryBtn = document.getElementById('backFromHistoryBtn');
+
+    setStartButtonEnabled(false);
+    loadHistory();
+    checkConfiguration();
+
+    function setStartButtonEnabled(enabled) {
+      startBtn.disabled = !enabled;
+    }
+
+    function setConfigAlert(type, message) {
+      if (!type) {
+        configAlert.className = 'config-alert hidden';
+        configAlert.textContent = '';
+        return;
+      }
+
+      configAlert.className = `config-alert ${type}`;
+      configAlert.textContent = message;
+    }
+
+    function setHistoryDetailMode(enabled) {
+      backFromHistoryBtn.classList.toggle('hidden', !enabled);
+    }
+
+    async function checkConfiguration() {
+      try {
+        const response = await fetch(`${apiBaseUrl}/health`);
+        if (!response.ok) throw new Error('health check failed');
+        const data = await response.json();
+        deepseekConfigured = !!data.deepseekConfigured;
+
+        if (deepseekConfigured) {
+          setConfigAlert(null, '');
+          setStartButtonEnabled(true);
+        } else {
+          setConfigAlert('warning', '使用前需先配置环境变量 DEEPSEEK_API_KEY，配置完成后重新加载应用即可使用。');
+          setStartButtonEnabled(false);
+        }
+      } catch (error) {
+        deepseekConfigured = false;
+        setConfigAlert('warning', '无法确认 DeepSeek API Key 配置状态，请检查服务是否正常启动。');
+        setStartButtonEnabled(false);
+      }
+    }
+
+    // Start analysis
+    function startAnalysis() {
+      if (!deepseekConfigured) {
+        setConfigAlert('warning', '未检测到 DEEPSEEK_API_KEY。请先配置后再开始分析。');
+        return;
+      }
+
+      const input = document.getElementById('problemInput');
+      problem = input.value.trim();
+
+      if (!problem) {
+        input.focus();
+        input.style.borderColor = 'var(--danger)';
+        setTimeout(() => {
+          input.style.borderColor = '';
+        }, 2000);
+        return;
+      }
+
+      // Hide welcome, show first why
+      document.getElementById('welcomeCard').classList.add('hidden');
+      currentStep = 1;
+      updateProgress();
+      renderWhyCard(1);
+    }
+
+    // Update progress bar
+    function updateProgress() {
+      const progress = ((currentStep - 1) / 6) * 100;
+      document.getElementById('progressFill').style.width = `${progress}%`;
+    }
+
+    // Render a why card
+    function renderWhyCard(step) {
+      const container = document.getElementById('whyCardsContainer');
+
+      const card = document.createElement('div');
+      card.className = 'card why-card';
+      card.id = `whyCard${step}`;
+      card.style.animationDelay = '0.1s';
+
+      const questionText = step === 1
+        ? `为什么会出现这个问题：${problem}`
+        : `为什么会出现这种情况：${answers[step - 2]}`;
+
+      card.innerHTML = `
+        <div class="why-header">
+          <div class="why-number" id="whyNumber${step}">${step}</div>
+          <div class="why-title">第 ${step} 个为什么</div>
+        </div>
+        <div class="why-question">${escapeHtml(questionText)}</div>
+        <div class="why-input-group" id="whyInputGroup${step}">
+          <input
+            type="text"
+            class="why-input"
+            id="whyInput${step}"
+            placeholder="请输入你的回答..."
+            onkeypress="handleEnter(event, ${step})"
+            autofocus
+          />
+          <div class="input-actions">
+            ${step > 1 ? `
+              <button class="btn btn-secondary" onclick="goBack(${step})">
+                上一步
+              </button>
+            ` : ''}
+            <button class="btn btn-primary" onclick="submitAnswer(${step})">
+              提交回答
+            </button>
+          </div>
+        </div>
+        <div class="answer-display hidden" id="answerDisplay${step}">
+          <div class="answer-label">你的回答</div>
+          <div class="answer-text" id="answerText${step}"></div>
+        </div>
+      `;
+
+      container.appendChild(card);
+
+      // Focus input
+      setTimeout(() => {
+        const input = document.getElementById(`whyInput${step}`);
+        if (input) input.focus();
+      }, 100);
+    }
+
+    // Handle Enter key
+    function handleEnter(event, step) {
+      if (event.key === 'Enter') {
+        submitAnswer(step);
+      }
+    }
+
+    // Submit answer
+    function submitAnswer(step) {
+      const input = document.getElementById(`whyInput${step}`);
+      const answer = input.value.trim();
+
+      if (!answer) {
+        input.focus();
+        input.style.borderColor = 'var(--danger)';
+        setTimeout(() => {
+          input.style.borderColor = '';
+        }, 2000);
+        return;
+      }
+
+      // Save answer
+      answers[step - 1] = answer;
+
+      // Update UI
+      const card = document.getElementById(`whyCard${step}`);
+      const inputGroup = document.getElementById(`whyInputGroup${step}`);
+      const answerDisplay = document.getElementById(`answerDisplay${step}`);
+      const answerText = document.getElementById(`answerText${step}`);
+      const whyNumber = document.getElementById(`whyNumber${step}`);
+
+      inputGroup.classList.add('hidden');
+      answerDisplay.classList.remove('hidden');
+      answerText.textContent = answer;
+      card.classList.add('answered');
+      whyNumber.classList.add('completed');
+      whyNumber.innerHTML = '✓';
+
+      currentStep = step + 1;
+      updateProgress();
+
+      // Check if all 5 whys are complete
+      if (step < 5) {
+        // Render next card
+        setTimeout(() => {
+          renderWhyCard(step + 1);
+        }, 300);
+      } else {
+        // All done, start analysis
+        setTimeout(() => {
+          runAnalysis();
+        }, 500);
+      }
+    }
+
+    // Go back to previous step
+    function goBack(step) {
+      if (step <= 1) return;
+
+      const targetStep = step - 1;
+      const targetCard = document.getElementById(`whyCard${targetStep}`);
+      const targetInputGroup = document.getElementById(`whyInputGroup${targetStep}`);
+      const targetAnswerDisplay = document.getElementById(`answerDisplay${targetStep}`);
+      const targetInput = document.getElementById(`whyInput${targetStep}`);
+      const targetWhyNumber = document.getElementById(`whyNumber${targetStep}`);
+      const previousAnswer = answers[targetStep - 1] || '';
+
+      // Remove current step card
+      const currentCard = document.getElementById(`whyCard${step}`);
+      if (currentCard) currentCard.remove();
+
+      // Clear answers from target step onward
+      answers = answers.slice(0, targetStep - 1);
+      analysisResult = null;
+
+      // Reset target step to editable state
+      targetInputGroup.classList.remove('hidden');
+      targetAnswerDisplay.classList.add('hidden');
+      targetCard.classList.remove('answered');
+      targetWhyNumber.classList.remove('completed');
+      targetWhyNumber.textContent = String(targetStep);
+      targetInput.value = previousAnswer;
+      targetInput.focus();
+
+      // Hide async/result states
+      document.getElementById('loadingCard').classList.add('hidden');
+      document.getElementById('resultsCard').classList.add('hidden');
+      document.getElementById('errorCard').classList.add('hidden');
+
+      currentStep = targetStep;
+      updateProgress();
+    }
+
+    // Run AI analysis
+    async function runAnalysis() {
+      document.getElementById('loadingCard').classList.remove('hidden');
+      document.getElementById('errorCard').classList.add('hidden');
+
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ problem, answers })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || '分析失败');
+        }
+
+        analysisResult = await response.json();
+        displayResults();
+      } catch (error) {
+        console.error('Analysis error:', error);
+        document.getElementById('loadingCard').classList.add('hidden');
+        document.getElementById('errorCard').classList.remove('hidden');
+        if ((error.message || '').includes('DeepSeek API key not configured')) {
+          document.getElementById('errorText').textContent = '未检测到 DEEPSEEK_API_KEY，请先完成配置后重试。';
+        } else {
+          document.getElementById('errorText').textContent = error.message || '分析过程中出现错误，请稍后重试';
+        }
+      }
+    }
+
+    // Display results
+    function displayResults(options = {}) {
+      const saveToHistory = options.saveToHistory !== false;
+      const fromHistory = options.fromHistory === true;
+      document.getElementById('loadingCard').classList.add('hidden');
+      document.getElementById('resultsCard').classList.remove('hidden');
+      document.getElementById('progressFill').style.width = '100%';
+      setHistoryDetailMode(fromHistory);
+
+      // Root cause
+      document.getElementById('rootCauseText').textContent = analysisResult.rootCause || '未识别到根本原因';
+
+      // Analysis
+      if (analysisResult.analysis) {
+        document.getElementById('analysisSection').classList.remove('hidden');
+        document.getElementById('analysisText').textContent = analysisResult.analysis;
+      } else {
+        document.getElementById('analysisSection').classList.add('hidden');
+      }
+
+      // Solutions
+      const solutionList = document.getElementById('solutionList');
+      solutionList.innerHTML = '';
+
+      if (analysisResult.solutions && analysisResult.solutions.length > 0) {
+        analysisResult.solutions.forEach((solution, index) => {
+          const item = document.createElement('div');
+          item.className = 'solution-item';
+          item.style.animationDelay = `${index * 0.1}s`;
+          item.innerHTML = `
+            <div class="solution-header">
+              <span class="solution-priority ${solution.priority || 'medium'}">${translatePriority(solution.priority)}</span>
+              <span class="solution-title">${escapeHtml(solution.title)}</span>
+            </div>
+            <div class="solution-desc">${escapeHtml(solution.description)}</div>
+          `;
+          solutionList.appendChild(item);
+        });
+      }
+
+      // Prevention
+      document.getElementById('preventionText').textContent = analysisResult.prevention || '未提供预防措施';
+
+      // Summary chain
+      const summaryChain = document.getElementById('summaryChain');
+      summaryChain.innerHTML = `
+        <div class="summary-item">
+          <div class="summary-number">P</div>
+          <div>
+            <div class="summary-problem">问题</div>
+            <div class="summary-answer">${escapeHtml(problem)}</div>
+          </div>
+        </div>
+        ${answers.map((answer, index) => `
+          <div class="summary-item">
+            <div class="summary-number">${index + 1}</div>
+            <div>
+              <div class="summary-problem">为什么 ${index + 1}</div>
+              <div class="summary-answer">${escapeHtml(answer)}</div>
+            </div>
+          </div>
+        `).join('')}
+      `;
+
+      if (saveToHistory) {
+        saveCurrentAnalysisToHistory().catch(error => {
+          console.error('Failed to save history:', error);
+        });
+      }
+
+      // Scroll to results
+      document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Translate priority
+    function translatePriority(priority) {
+      const map = { high: '高优先级', medium: '中优先级', low: '低优先级' };
+      return map[priority] || '中优先级';
+    }
+
+    // Escape HTML
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Retry analysis
+    function retryAnalysis() {
+      document.getElementById('errorCard').classList.add('hidden');
+      runAnalysis();
+    }
+
+    // Restart analysis
+    function restartAnalysis() {
+      // Reset state
+      problem = '';
+      answers = [];
+      currentStep = 0;
+      analysisResult = null;
+      setHistoryDetailMode(false);
+
+      // Reset UI
+      document.getElementById('problemInput').value = '';
+      document.getElementById('whyCardsContainer').innerHTML = '';
+      document.getElementById('resultsCard').classList.add('hidden');
+      document.getElementById('errorCard').classList.add('hidden');
+      document.getElementById('welcomeCard').classList.remove('hidden');
+      document.getElementById('progressFill').style.width = '0%';
+      renderHistory();
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function saveCurrentAnalysisToHistory() {
+      if (!problem || !analysisResult || answers.length !== 5) return;
+
+      const payload = {
+        problem,
+        answers: [...answers],
+        analysisResult: JSON.parse(JSON.stringify(analysisResult))
+      };
+
+      const response = await fetch(`${apiBaseUrl}/api/history`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || '保存历史失败');
+      }
+
+      await loadHistory();
+    }
+
+    async function loadHistory() {
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/history`);
+        if (!response.ok) throw new Error('history fetch failed');
+        const data = await response.json();
+        const items = Array.isArray(data.items) ? data.items : [];
+        historyItems = items;
+      } catch (error) {
+        console.error('Load history error:', error);
+        historyItems = [];
+      }
+      renderHistory();
+    }
+
+    function renderHistory() {
+      if (!historyItems.length) {
+        historySection.classList.add('hidden');
+        historyList.innerHTML = '';
+        return;
+      }
+
+      historySection.classList.remove('hidden');
+      historyList.innerHTML = historyItems.map((item, index) => `
+        <div class="history-item">
+          <div>
+            <div class="history-problem">${escapeHtml(item.problem || '')}</div>
+            <div class="history-meta">${formatTime(item.timestamp)}</div>
+          </div>
+          <button class="btn btn-secondary btn-small" onclick="viewHistoryItem(${index})">查看</button>
+        </div>
+      `).join('');
+    }
+
+    function viewHistoryItem(index) {
+      const item = historyItems[index];
+      if (!item || !item.analysisResult || !Array.isArray(item.answers)) return;
+
+      problem = item.problem || '';
+      answers = [...item.answers];
+      analysisResult = item.analysisResult;
+      currentStep = 6;
+
+      document.getElementById('whyCardsContainer').innerHTML = '';
+      document.getElementById('welcomeCard').classList.add('hidden');
+      document.getElementById('errorCard').classList.add('hidden');
+      document.getElementById('loadingCard').classList.add('hidden');
+      displayResults({ saveToHistory: false, fromHistory: true });
+    }
+
+    async function clearHistory() {
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/history`, {
+          method: 'DELETE'
+        });
+        if (!response.ok && response.status !== 204) {
+          throw new Error('clear history failed');
+        }
+      } catch (error) {
+        console.error('Clear history error:', error);
+      } finally {
+        historyItems = [];
+        renderHistory();
+      }
+    }
+
+    function formatTime(timestamp) {
+      if (!timestamp) return '未知时间';
+      return new Date(timestamp).toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Copy results
+    async function copyResults() {
+      if (!analysisResult) return;
+
+      const text = `5 Whys 分析结果
+
+问题：${problem}
+
+根本原因：${analysisResult.rootCause}
+
+详细分析：
+${analysisResult.analysis || '无'}
+
+解决方案：
+${analysisResult.solutions?.map((s, i) => `${i + 1}. [${translatePriority(s.priority)}] ${s.title}\n   ${s.description}`).join('\n\n') || '无'}
+
+预防措施：
+${analysisResult.prevention || '无'}
+
+分析链路：
+${answers.map((a, i) => `为什么 ${i + 1}：${a}`).join('\n')}
+`;
+      const originalText = copyBtn.textContent;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = '✓ 已复制';
+      } catch (error) {
+        copyBtn.textContent = '复制失败';
+      } finally {
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+        }, 2000);
+      }
+    }
+  </script>
+</body>
+</html>
